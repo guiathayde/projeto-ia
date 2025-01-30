@@ -36,7 +36,6 @@ df_tweets.drop_duplicates(inplace=True)
 
 ## Dicionário para tratar "expressões de internet"
 
-Nesta etapa juntei o máximo de expressões possíveis que consegui lembrar para unificá-las antes de passar pelo corretor automático.
 """
 
 #Dicionário com todas palavras ou expressões regulares para substituição
@@ -88,7 +87,7 @@ stopwordsen = set(stopwords.words("english"))
 
 """## Definição do Corpus para Correção das Palavras
 
-Para compor o Corpus optei pelo _Corpus Brasileiro_ disponível em https://www.linguateca.pt/ACDC/, contendo aproximadamente 1bilhão de palavras, sendo o Corpus público mais completo que encontrei.
+Para compor o Corpus tem o _Corpus Brasileiro_ disponível em https://www.linguateca.pt/ACDC/, contendo aproximadamente 1bilhão de palavras, sendo o Corpus público bem completo.
 
 O Corpus Brasileiro é uma coletânea de aproximadamente um bilhão de palavras de português brasileiro, resultado de projeto coordenado por Tony Berber Sardinha, (GELC, LAEL, Cepril, PUCSP), com financiamento da Fapesp.
 """
@@ -108,12 +107,6 @@ corpus = corpus[['Palavra',  'Frequencia']]
 # 361900 palavras
 corpus.to_csv('FREQUENCIA_TRATADA.csv', header=False, index=False, sep=";")
 
-"""## Correção de Palavras
-Como era uma competição que estava desenvolvendo entre meu tempo livre entre trabalho e faculdade, precisava que o processamento fosse o mais rápido possível mantendo a qualidade do tratamento, testei algumas bibliotecas para correção de palavras e a que teve o melhor desepenho foi a symspellpy, onde obtive maiores detalhes sobre seu funcionamento através dos artigos [A quick overview of the implementation of a fast spelling correction algorithm](https://medium.com/@agusnavce/a-quick-overview-of-the-implementation-of-a-fast-spelling-correction-algorithm-39a483a81ddc) e [Spell check and correction[NLP, Python]](https://medium.com/@yashj302/spell-check-and-correction-nlp-python-f6a000e3709d)
-"""
-
-#Corretor Ortográfico por cada palavra - execução rápida
-
 from symspellpy import SymSpell, Verbosity
 
 sym_spell = SymSpell(max_dictionary_edit_distance=5, prefix_length=10)
@@ -123,8 +116,7 @@ sym_spell = SymSpell(max_dictionary_edit_distance=5, prefix_length=10)
 sym_spell.load_dictionary('FREQUENCIA_TRATADA.csv', term_index=0, count_index=1, separator=';')
 
 """### Exceções
-
-Na célula abaixo considerei nomes comuns no Brasil, as maiores marcas globais, maiores marcas do Brasil e palavras em inglês para não serem alteradas para outras palavras erroneamente pelo SymSpell
+Palavras que não estão no dicionário e não devem ser corrigidas
 """
 
 from spellchecker import SpellChecker
@@ -258,7 +250,7 @@ def ListaCorrecao(coluna_texto):
 
     lista_palavras_unicas = list(set(coluna_texto.str.split().sum()))
     lista_palavras_unicas = list(portugueseSpellChecker.unknown(lista_palavras_unicas))
-    #Cria uma lista com as palavras não encontradas no dicionário da língua portuguesa
+    #Cria uma lista com as palavras não encontradas no dicionário
     #para serem corrigidas, desconsiderando nomes, marcas populares mundialmente e no Brasil e palavras em inglês
     lista_palavras_unicas = [palavra for palavra in lista_palavras_unicas if palavra not in nomes]
     lista_palavras_unicas = [palavra for palavra in lista_palavras_unicas if palavra not in brand_names]
@@ -517,9 +509,6 @@ print(confu_matrix)
 """# Aplicação do Modelo"""
 
 df_test = pd.read_csv("test_pt.csv")
-#display(df_test)
-
-"""## Tratamento dos dados submetidos para a Competição"""
 
 # Aplicar a função ao DataFrame df_tweets
 df_test = TrataDfTexto(df_test, 'text', dict_replace_words)
